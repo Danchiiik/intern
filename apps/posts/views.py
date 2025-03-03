@@ -4,7 +4,7 @@ from rest_framework.viewsets import  ModelViewSet
 
 from apps.feedback.views import FeedbackMixin
 from apps.posts.models import Post
-from apps.posts.permissions import  IsStaff
+from apps.posts.permissions import  IsFeedbackOwner, IsOwner
 from apps.posts.serializers import PostSerializer
 from apps.posts.utils import send_telegram_message
 
@@ -17,12 +17,11 @@ class PostViewset(ModelViewSet, FeedbackMixin):
     queryset = Post.objects.all()
     
     def get_permissions(self):
-        if self.action == 'delete_comment' or self.action == 'edit_comment':
-            return [IsStaff()]
-        if self.action == 'add_comment':
-            return [AllowAny()]
-        return super().get_permissions()
-        
+        if self.action == 'delete_comment' or self.action == 'edit_comment' or self.action == 'get_comments':
+            return [IsFeedbackOwner()]
+        return [IsOwner()]
+
+
     def perform_create(self, serializer):
         post = serializer.save(owner=self.request.user)
         

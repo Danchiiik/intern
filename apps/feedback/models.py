@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 class Comment(models.Model):
-    owner = models.CharField(max_length=255)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     comment = models.CharField(max_length=250)
     created_at = models.DateTimeField(auto_now_add=True)

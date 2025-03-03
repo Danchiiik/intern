@@ -6,10 +6,11 @@ User = get_user_model()
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    
+    owner = serializers.ReadOnlyField(source='owner.email')
+
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['comment']
         
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -26,4 +27,4 @@ class CommentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['owner', 'comment', 'created_at'] 
+        fields = ['id', 'owner', 'comment', 'created_at'] 

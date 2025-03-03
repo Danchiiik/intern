@@ -1,4 +1,5 @@
 from apps.feedback.serializers import CommentListSerializer, RatingSerializer
+from apps.posts.models import Post
 from .models import Comment, Rating
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,16 +9,31 @@ from rest_framework.views import APIView
 
 
 class FeedbackMixin:
+
+    def get_comments(self, request, pk=None):
+        """
+        Retrieve all comments for a specific post.
+        """
+        try:
+            post = self.get_object()  
+            comments = Comment.objects.filter(post=post)  
+            serializer = CommentListSerializer(comments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except Post.DoesNotExist:
+            return Response('Пост не найден', status=status.HTTP_404_NOT_FOUND)
+
+
     def add_comment(self, request, pk=None):
         try:
             post = self.get_object()
             comment = request.data['comment']
-            user = request.data['owner']
+            user = request.user
             comment_obj = Comment.objects.create(owner=user, post=post, comment=comment)
             comment_obj.save()
             return Response('Комментарий добавлен', status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response(f'Напишите свой ник', status=status.HTTP_400_BAD_REQUEST)
+            return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
         
         
     def delete_comment(self, request, pk):
